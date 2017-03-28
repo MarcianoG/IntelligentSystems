@@ -13,25 +13,27 @@ import policy.ProbablityDeterministicPolicy;
 public class Main {
 
     public static void main(String[] args) {
-        reruns(50);
-//        given();
+//        reruns(50);
+        given();
     }
 
     public static void given() {
-        QLearningPlayer qPlayer = new QLearningPlayer(State.FIRST_PLAYER, 0.9, new RandomExploration());
-        Player p2 = new PolicyPlayer(new DeterministicPolicy());
+        QLearningPlayer qPlayer2 = new QLearningPlayer(State.SECOND_PLAYER, 0.9, new RandomExploration());
+                MinimaxQPlayer qPlayer = new MinimaxQPlayer(State.FIRST_PLAYER, 0.9,1, null);
 
-        Simulator sim = new Simulator(qPlayer, p2);
-        sim.simulate(1_000_000, 0.1);
+        Player policyPlayer = new PolicyPlayer(new ProbablityDeterministicPolicy());//REPLACE THIS BIT
+
+        Simulator sim = new Simulator(qPlayer, qPlayer2);
+        sim.simulate(100_000, 0.1);
         System.out.println("Training QR finished");
 
         Policy QR = qPlayer.getPolicy();
-        sim.setP2(p2);
+        sim.setP2(new PolicyPlayer(qPlayer2.getPolicy()));
         sim.setP1(new PolicyPlayer(QR));
         sim.simulate(1_000_000, 0.1);
         System.out.println("Evaluation QR finished");
-        System.out.println("Ours: " + sim.getGoalsP1());
-        System.out.println("QR: " + sim.getGoalsP2());
+        System.out.println("p1: " + sim.getGoalsP1());
+        System.out.println("p2: " + sim.getGoalsP2());
         System.out.println("");
     }
 

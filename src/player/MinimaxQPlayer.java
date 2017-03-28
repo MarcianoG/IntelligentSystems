@@ -39,10 +39,10 @@ public class MinimaxQPlayer implements Player {
         this.player = player;
         this.discountFactor = discountFactor;
         this.decay = decay;//All the possible states
-        for (int x1 = 0; x1 <= State.MAX_X; x1++) {
-            for (int y1 = 0; y1 <= State.MAX_Y; y1++) {
-                for (int x2 = 0; x2 <= State.MAX_X; x2++) {
-                    for (int y2 = 0; y2 <= State.MAX_Y; y2++) {
+        for (int x1 = -1; x1 <= State.MAX_X+1; x1++) {
+            for (int y1 = -1; y1 <= State.MAX_Y+1; y1++) {
+                for (int x2 = -1; x2 <= State.MAX_X+1; x2++) {
+                    for (int y2 = -1; y2 <= State.MAX_Y+1; y2++) {
                         if (x1 == x2 && y2 == y1) {
                             continue;
                         }
@@ -69,10 +69,10 @@ public class MinimaxQPlayer implements Player {
         ArrayList<Integer> al = new ArrayList<>();
         int c = 0;
         int v = 0;
-        for (int x1 = 0; x1 < State.MAX_X; x1++) {
-            for (int y1 = 0; y1 < State.MAX_Y; y1++) {
-                for (int x2 = 0; x2 < State.MAX_X; x2++) {
-                    for (int y2 = 0; y2 < State.MAX_Y; y2++) {
+        for (int x1 = -1; x1 < State.MAX_X; x1++) {
+            for (int y1 = -1; y1 < State.MAX_Y; y1++) {
+                for (int x2 = -1; x2 < State.MAX_X; x2++) {
+                    for (int y2 = -1; y2 < State.MAX_Y; y2++) {
                         if (x1 == x2 && y2 == y1) {
                             continue;
                         }
@@ -146,11 +146,6 @@ public class MinimaxQPlayer implements Player {
     public void receiveReward(double reward, State newState, Action opponentAction) {
         //Q[s,a,o] := (1-alpha) * Q[s,a,o] + alpha * (rew + gamma * V[s’])
         Point[] s2 = new Point[]{newState.getP1(), newState.getP2()};
-        System.out.println(currentAction != null);
-        System.out.println(opponentAction != null);
-        System.out.println(s2 != null);
-        System.out.println(s2[0]);
-        System.out.println(s2[1]);
         double currentQ = qValues.get(new Triple(stateHash(s2), currentAction, opponentAction));
         double newQ = 1d - alpha * currentQ + alpha * (reward + discountFactor + values.get(stateHash(s2)));
         qValues.put(new Triple(stateHash(s2), currentAction, opponentAction), newQ);
@@ -208,15 +203,18 @@ public class MinimaxQPlayer implements Player {
             lp.addConstraint(new LinearSmallerThanEqualsConstraint(arr2, 0, "c" + (i + 1)));
         }
         lp.setMinProblem(false);
-
+        
         LinearProgramSolver solver = SolverFactory.newDefault();
         double[] sol = solver.solve(lp);
         double[] newPi = new double[allActions.length];
 
         HashMap<Action, Double> actions = pi.get(stateHash(currentState));
         int i = 0;
+        if(sol == null || sol.length!=5){
+            return;
+        }
         for (Action key : actions.keySet()) {
-            actions.put(key, newPi[i++]);
+            actions.put(key, sol[i++]);
         }
         pi.put(stateHash(currentState), actions);
 //         System.arraycopy(sol, 1, newPi, 0, newPi.length);
