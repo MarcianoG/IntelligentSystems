@@ -28,11 +28,11 @@ public class MinimaxQPlayer implements Player {
     private double alpha;
     private double discountFactor;
     private double decay;
-    private Map<Triple<State, Action, Action>, Double> qValues = new HashMap();
-    private Map<Point[], Double> values = new HashMap();
+    private Map<Triple<Integer, Action, Action>, Double> qValues = new HashMap();
+    private Map<Integer, Double> values = new HashMap();
     //private Map<Point[], double[]> pi;
     //private List<Point[]> allStates = new ArrayList();                      
-    HashMap<Point[], HashMap<Action, Double>> pi = new HashMap(); //PI
+    HashMap<Integer, HashMap<Action, Double>> pi = new HashMap(); //PI
 
     public MinimaxQPlayer(boolean player, double discountFactor, double decay, ExplorationStrategy es) {
         this.player = player;
@@ -47,15 +47,15 @@ public class MinimaxQPlayer implements Player {
                         }
                         Point[] state = new Point[]{new Point(x1, y1), new Point(x2, y2)};
 
-                        values.put(state, 1d);
+                        values.put(stateHash(state), 1d);
                         HashMap<Action, Double> actions = new HashMap();
                         for (Action a : Action.values()) {
                             actions.put(a, 1d / 5.0);
                             for (Action aa : Action.values()) {
-                                qValues.put(new Triple(state, a, aa), 1d);
+                                qValues.put(new Triple(stateHash(state), a, aa), 1d);
                             }
                         }
-                        pi.put(state, actions);
+                        pi.put(stateHash(state), actions);
 
                     }
                 }
@@ -63,6 +63,15 @@ public class MinimaxQPlayer implements Player {
 
             alpha = 1d;
         }
+    }
+
+    private static int stateHash(Point[] state) {
+        int hash = 0;
+        int i = 0;
+        for (Point p : state) {
+            hash += (i += 77) * Math.pow(p.getX(), 3) * Math.pow(p.getY(), 3);
+        }
+        return hash;
     }
 
     private static class Pair<A, B> {
@@ -80,14 +89,14 @@ public class MinimaxQPlayer implements Player {
 
     @Override
     public Action chooseAction(State state) {
-        s= state;
+        s = state;
         currentState = new Point[]{state.getP1(), state.getP2()};
         if (r.nextDouble() > 0.99) {
             currentAction = new RandomPlayer(this.player).chooseAction(state);
             return currentAction;
         }
 
-        HashMap<Action, Double> prob = pi.get(currentState);
+        HashMap<Action, Double> prob = pi.get(stateHash(currentState));
         double rand = r.nextDouble();
         double t = 0d;
         for (Entry<Action, Double> entry : prob.entrySet()) {
@@ -107,10 +116,10 @@ public class MinimaxQPlayer implements Player {
         //Q[s,a,o] := (1-alpha) * Q[s,a,o] + alpha * (rew + gamma * V[s’])
         Point[] s2 = new Point[]{newState.getP1(), newState.getP2()};
 
-        double currentQ = qValues.get(new Triple(currentState, currentAction, opponentAction));
-        double newQ = 1d - alpha * currentQ + alpha * (reward + discountFactor + values.get(s2));
-        qValues.put(new Triple(currentState, currentAction, opponentAction), newQ);
-        learn(newState,opponentAction);
+        double currentQ = qValues.get(new Triple(stateHash(currentState), currentAction, opponentAction));
+        double newQ = 1d - alpha * currentQ + alpha * (reward + discountFactor + values.get(stateHash(s2)));
+        qValues.put(new Triple(stateHash(currentState), currentAction, opponentAction), newQ);
+        learn(newState, opponentAction);
     }
 
     public void learn(State newState, Action opponentAction) {
@@ -121,14 +130,14 @@ public class MinimaxQPlayer implements Player {
             double sum = 0;
             //a'
             for (Action a : Action.values()) {
-                sum += pi.get(s2).get(a) * qValues.get(new Triple(s2, a, o));
+                sum += pi.get(stateHash(s2)).get(a) * qValues.get(new Triple(s2, a, o));
             }
             if (min > sum) {
                 min = sum;
             }
         }
 
-        values.put(s2, min);
+        values.put(stateHash(s2), min);
         alpha *= decay;
     }
 
@@ -159,8 +168,7 @@ public class MinimaxQPlayer implements Player {
             double[] arr2 = new double[maxObjective.length];
             arr2[0] = 1.0;
             for (int j = 0; j < allActions.length; j++) {
-                arr2[i + 1] = -this.qValues
-                        .get(new Triple<State, Action, Action>(s, allActions[i], allActions[j]));
+                arr2[i + 1] = -this.qValues.get(new Triple<>(stateHash(currentState), allActions[i], allActions[j]));
             }
             lp.addConstraint(new LinearSmallerThanEqualsConstraint(arr2, 0, "c" + (i + 1)));
         }
@@ -169,13 +177,13 @@ public class MinimaxQPlayer implements Player {
         LinearProgramSolver solver = SolverFactory.newDefault();
         double[] sol = solver.solve(lp);
         double[] newPi = new double[allActions.length];
-      
-      	HashMap<Action,Double> actions = pi.get(s);
-        int i=0;
-        for(Action key : actions.keySet()){
-          actions.put(key,newPi[i++]);
+
+        HashMap<Action, Double> actions = pi.get(stateHash(currentState));
+        int i = 0;
+        for (Action key : actions.keySet()) {
+            actions.put(key, newPi[i++]);
         }
-        pi.put(currentState,actions);
+        pi.put(stateHash(currentState), actions);
 //         System.arraycopy(sol, 1, newPi, 0, newPi.length);
 //         this.pi.put(currentState,(allActions ,newPi));
     }
