@@ -118,7 +118,7 @@ public class MinimaxQPlayer implements Player {
 
         double currentQ = qValues.get(new Triple(stateHash(currentState), currentAction, opponentAction));
         double newQ = 1d - alpha * currentQ + alpha * (reward + discountFactor + values.get(stateHash(s2)));
-        qValues.put(new Triple(stateHash(currentState), currentAction, opponentAction), newQ);
+        qValues.put(new Triple(stateHash(s2), currentAction, opponentAction), newQ);
         learn(newState, opponentAction);
     }
 
@@ -130,7 +130,7 @@ public class MinimaxQPlayer implements Player {
             double sum = 0;
             //a'
             for (Action a : Action.values()) {
-                sum += pi.get(stateHash(s2)).get(a) * qValues.get(new Triple(s2, a, o));
+                sum += pi.get(stateHash(s2)).get(a) * qValues.get(new Triple(stateHash(s2), a, o));
             }
             if (min > sum) {
                 min = sum;
