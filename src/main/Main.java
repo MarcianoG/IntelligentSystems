@@ -5,6 +5,7 @@ import player.MinimaxQPlayer;
 import player.Player;
 import player.PolicyPlayer;
 import player.QLearningPlayer;
+import player.RandomPlayer;
 import policy.DeterministicPolicy;
 import policy.Policy;
 import policy.ProbablityDeterministicPolicy;
@@ -37,7 +38,7 @@ public class Main {
     public static void reruns(int i) {
 //        QLearningPlayer qPlayer = new QLearningPlayer(State.FIRST_PLAYER, 0.9, new RandomExploration());
         MinimaxQPlayer qPlayer = new MinimaxQPlayer(State.FIRST_PLAYER, 0.9,1, null);
-        Player policyPlayer = new PolicyPlayer(new DeterministicPolicy());//REPLACE THIS BIT
+        Player policyPlayer = new RandomPlayer(State.SECOND_PLAYER);//REPLACE THIS BIT
 
         System.out.println("Training QR finished");
         long s1 = 0;
