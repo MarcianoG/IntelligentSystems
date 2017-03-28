@@ -22,12 +22,10 @@ public class ProbabilisticPolicy extends HashMap<State, double[]> implements Pol
     }
 
     private static int stateHash(Point[] state) {
-        int hash = 0;
-        int i = 0;
-        for (Point p : state) {
-            hash += (i += 77) * Math.pow(p.getX(), 3) * Math.pow(p.getY(), 3);
-        }
-        return hash;
+        Point p1 = state[0];
+        Point p2 = state[1];
+
+        return  p1.x + p1.y * 10 + p2.x * 100 + p2.y * 1000;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import exploration.ExplorationStrategy;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -38,6 +39,8 @@ public class MinimaxQPlayer implements Player {
         this.player = player;
         this.discountFactor = discountFactor;
         this.decay = decay;//All the possible states
+        System.out.println("bla");
+        int adsad = 0;
         for (int x1 = 0; x1 < State.MAX_X; x1++) {
             for (int y1 = 0; y1 < State.MAX_Y; y1++) {
                 for (int x2 = 0; x2 < State.MAX_X; x2++) {
@@ -53,6 +56,7 @@ public class MinimaxQPlayer implements Player {
                             actions.put(a, 1d / 5.0);
                             for (Action aa : Action.values()) {
                                 qValues.put(new Triple(stateHash(state), a, aa), 1d);
+                                adsad++;
                             }
                         }
                         pi.put(stateHash(state), actions);
@@ -60,18 +64,44 @@ public class MinimaxQPlayer implements Player {
                     }
                 }
             }
-
-            alpha = 1d;
         }
+        alpha = 1d;
+    }
+
+    public static void main(String[] args) {
+        ArrayList<Integer> al = new ArrayList<>();
+        int c = 0;
+        int v = 0;
+        for (int x1 = 0; x1 < State.MAX_X; x1++) {
+            for (int y1 = 0; y1 < State.MAX_Y; y1++) {
+                for (int x2 = 0; x2 < State.MAX_X; x2++) {
+                    for (int y2 = 0; y2 < State.MAX_Y; y2++) {
+                        if (x1 == x2 && y2 == y1) {
+                            continue;
+                        }
+                        v++;
+                        int i = stateHash(new Point[]{new Point(x2, y2), new Point(x1, y1)});
+                        if (!al.contains(i)) {
+                            al.add(i);
+                        } else {
+                            c++;
+                            System.out.println("--------");
+                            System.out.println(x1 + " " + y1);
+                            System.out.println(x2 + " " + y2);
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("Tot " + v);
+        System.out.println(c);
     }
 
     private static int stateHash(Point[] state) {
-        int hash = 0;
-        int i = 0;
-        for (Point p : state) {
-            hash += (i += 77) * Math.pow(p.getX(), 3) * Math.pow(p.getY(), 3);
-        }
-        return hash;
+        Point p1 = state[0];
+        Point p2 = state[1];
+
+        return  p1.x + p1.y * 10 + p2.x * 100 + p2.y * 1000;
     }
 
     private static class Pair<A, B> {
@@ -115,7 +145,6 @@ public class MinimaxQPlayer implements Player {
     public void receiveReward(double reward, State newState, Action opponentAction) {
         //Q[s,a,o] := (1-alpha) * Q[s,a,o] + alpha * (rew + gamma * V[s’])
         Point[] s2 = new Point[]{newState.getP1(), newState.getP2()};
-
         double currentQ = qValues.get(new Triple(stateHash(s2), currentAction, opponentAction));
         double newQ = 1d - alpha * currentQ + alpha * (reward + discountFactor + values.get(stateHash(s2)));
         qValues.put(new Triple(stateHash(s2), currentAction, opponentAction), newQ);
