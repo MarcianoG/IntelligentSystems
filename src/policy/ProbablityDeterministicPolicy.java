@@ -19,8 +19,9 @@ public class ProbablityDeterministicPolicy extends HashMap<State, Action> implem
 
     Random r = new Random();
 
-    public ProbablityDeterministicPolicy(HashMap<State, Action> hashMap) {
-        super(hashMap);
+   
+    public ProbablityDeterministicPolicy() {
+        super();
     }
 
     @Override
@@ -94,19 +95,19 @@ public class ProbablityDeterministicPolicy extends HashMap<State, Action> implem
     }
 
     private boolean isAbove(Point p1, Point p2) {
-        return p2.y == p1.y - 1;
+        return p2.y == p1.y + 1;
     }
 
     private boolean isLeft(Point p1, Point p2) {
-        return p2.x == p1.x + 1;
-    }
-
-    private boolean isRight(Point p1, Point p2) {
         return p2.x == p1.x - 1;
     }
 
+    private boolean isRight(Point p1, Point p2) {
+        return p2.x == p1.x + 1;
+    }
+
     private boolean isBelow(Point p1, Point p2) {
-        return p2.y == p1.y + 1;
+        return p2.y == p1.y - 1;
     }
 
     private boolean rand(double limit) {

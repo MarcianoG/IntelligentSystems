@@ -18,14 +18,18 @@ public class DeterministicPolicy extends HashMap<State, Action> implements Polic
         super(policy);
     }
 
+    public DeterministicPolicy() {
+        super();
+    }
+
     @Override
     public Action getAction(State state) {
         Point P1 = state.getP1();
         Point P2 = state.getP2();
-        if(state.getPossession() == State.FIRST_PLAYER){
-            
+        if (state.getPossession() == State.FIRST_PLAYER) {
+
         } else {
-            if(P1.x == )
+
         }
         return super.get(state);
     }
