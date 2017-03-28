@@ -116,7 +116,7 @@ public class MinimaxQPlayer implements Player {
         //Q[s,a,o] := (1-alpha) * Q[s,a,o] + alpha * (rew + gamma * V[s’])
         Point[] s2 = new Point[]{newState.getP1(), newState.getP2()};
 
-        double currentQ = qValues.get(new Triple(stateHash(currentState), currentAction, opponentAction));
+        double currentQ = qValues.get(new Triple(stateHash(s2), currentAction, opponentAction));
         double newQ = 1d - alpha * currentQ + alpha * (reward + discountFactor + values.get(stateHash(s2)));
         qValues.put(new Triple(stateHash(s2), currentAction, opponentAction), newQ);
         learn(newState, opponentAction);
